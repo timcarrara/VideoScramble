@@ -1,20 +1,19 @@
 package org.example;
 
 import javafx.application.Application;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.image.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 import java.nio.ByteBuffer;
-import javafx.scene.image.PixelFormat;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
 
-import java.awt.image.BufferedImage;
-
+/**
+ * Main d'exemple : lecture image, scramble, brute-force multithread, affichage.
+ */
 public class Main extends Application {
 
     static { System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME); }
@@ -22,28 +21,32 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
 
-        // Charge l'image
-        Mat img = Imgcodecs.imread("src/images/image.jpg");
+        String path = "src/images/image.jpg";
+        Mat img = Imgcodecs.imread(path);
 
         if (img.empty()) {
-            System.out.println("Impossible de charger l'image !");
+            System.err.println("Impossible de charger l'image : " + path);
             return;
         }
 
+        // clé connue (pour vérifier)
         int r = 50;
         int s = 20;
 
-        // Chiffre
+        // chiffrement
         Mat scrambled = FrameScrambler.scramble(img, r, s);
+        System.out.println("Image chiffrée.");
 
-        // Déchiffre par brute-force
-        int[] key = FrameScrambler.bruteForce(scrambled);
-        int foundR = key[0];
-        int foundS = key[1];
+        // brute-force multithread (retourne la meilleure clé)
+        long t0 = System.currentTimeMillis();
+        int[] found = FrameScrambler.bruteForce(scrambled);
+        long t1 = System.currentTimeMillis();
+        System.out.println("Brute-force terminé en " + (t1 - t0) + " ms. clé trouvée : r=" + found[0] + " s=" + found[1]);
 
-        Mat brute = FrameScrambler.unscramble(scrambled, foundR, foundS);
+        // Déchiffrer avec la clé trouvée
+        Mat brute = FrameScrambler.unscramble(scrambled, found[0], found[1]);
 
-        // Affichage JavaFX
+        // Affichage JavaFX (conversion BGR -> RGB sans filtre bleu)
         ImageView v1 = new ImageView(matToFX(img));
         ImageView v2 = new ImageView(matToFX(scrambled));
         ImageView v3 = new ImageView(matToFX(brute));
@@ -54,14 +57,14 @@ public class Main extends Application {
 
         HBox root = new HBox(10, v1, v2, v3);
         stage.setScene(new Scene(root));
-        stage.setTitle("Scramble / Brute-force decrypt");
+        stage.setTitle("Scramble / Brute-force decrypt (multithread)");
         stage.show();
     }
 
     // Convertit Mat (BGR) → WritableImage (RGB)
     private Image matToFX(Mat mat) {
         Mat rgb = new Mat();
-        org.opencv.imgproc.Imgproc.cvtColor(mat, rgb, org.opencv.imgproc.Imgproc.COLOR_BGR2RGB);
+        Imgproc.cvtColor(mat, rgb, Imgproc.COLOR_BGR2RGB);
 
         int width = rgb.cols();
         int height = rgb.rows();
