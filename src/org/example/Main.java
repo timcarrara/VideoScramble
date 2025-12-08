@@ -1,60 +1,84 @@
 package org.example;
 
 import javafx.application.Application;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import javafx.scene.image.Image;
-
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
+import java.nio.ByteBuffer;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+
+import java.awt.image.BufferedImage;
 
 public class Main extends Application {
 
+    static { System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME); }
+
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Image Scramble Viewer");
 
-        // Deux zones d’affichage
-        ImageView left = new ImageView();
-        ImageView right = new ImageView();
+        // Charge l'image
+        Mat img = Imgcodecs.imread("src/images/image.jpg");
 
-        left.setFitWidth(640);
-        right.setFitWidth(640);
-        left.setPreserveRatio(true);
-        right.setPreserveRatio(true);
-
-        HBox root = new HBox(10, left, right);
-        Scene scene = new Scene(root, 1300, 600);
-        stage.setScene(scene);
-        stage.show();
-
-        // Charge l’image
-        Mat img = Imgcodecs.imread("src/images/test.jpg");
         if (img.empty()) {
-            System.err.println("❌ Impossible de charger l'image !");
+            System.out.println("Impossible de charger l'image !");
             return;
         }
 
-        // Image originale → JavaFX
-        Image fxOriginal = MatToImage.matToImage(img);
-        left.setImage(fxOriginal);
+        int r = 50;
+        int s = 20;
 
-        // Scramble → JavaFX
-        Mat scrambled = VideoScrambler.scramble(img);
-        Image fxScrambled = MatToImage.matToImage(scrambled);
-        right.setImage(fxScrambled);
+        // Chiffre
+        Mat scrambled = FrameScrambler.scramble(img, r, s);
+
+        // Déchiffre par brute-force
+        int[] key = FrameScrambler.bruteForce(scrambled);
+        int foundR = key[0];
+        int foundS = key[1];
+
+        Mat brute = FrameScrambler.unscramble(scrambled, foundR, foundS);
+
+        // Affichage JavaFX
+        ImageView v1 = new ImageView(matToFX(img));
+        ImageView v2 = new ImageView(matToFX(scrambled));
+        ImageView v3 = new ImageView(matToFX(brute));
+
+        v1.setFitWidth(300); v1.setPreserveRatio(true);
+        v2.setFitWidth(300); v2.setPreserveRatio(true);
+        v3.setFitWidth(300); v3.setPreserveRatio(true);
+
+        HBox root = new HBox(10, v1, v2, v3);
+        stage.setScene(new Scene(root));
+        stage.setTitle("Scramble / Brute-force decrypt");
+        stage.show();
+    }
+
+    // Convertit Mat (BGR) → WritableImage (RGB)
+    private Image matToFX(Mat mat) {
+        Mat rgb = new Mat();
+        org.opencv.imgproc.Imgproc.cvtColor(mat, rgb, org.opencv.imgproc.Imgproc.COLOR_BGR2RGB);
+
+        int width = rgb.cols();
+        int height = rgb.rows();
+        int channels = rgb.channels();
+
+        byte[] buffer = new byte[width * height * channels];
+        rgb.get(0, 0, buffer);
+
+        WritableImage image = new WritableImage(width, height);
+        PixelWriter pw = image.getPixelWriter();
+        PixelFormat<ByteBuffer> pf = PixelFormat.getByteRgbInstance();
+
+        pw.setPixels(0, 0, width, height, pf, buffer, 0, width * channels);
+        return image;
     }
 
     public static void main(String[] args) {
-        try {
-            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-            System.out.println("OpenCV chargé !");
-        } catch (UnsatisfiedLinkError e) {
-            System.err.println("❌ OpenCV non trouvé.");
-        }
         launch();
     }
 }
