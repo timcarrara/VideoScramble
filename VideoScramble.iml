@@ -5,20 +5,29 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="openjdk-21" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/opencv/build/java/opencv-4120.jar!/" />
+          <root url="file://$MODULE_DIR$/../../../../javafx-sdk-25.0.1/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../../../../javafx-sdk-25.0.1/lib" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../opencv/build/java/opencv-4110.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/Downloads/opencv/build/java/opencv-4120.jar!/" />
-          <root url="jar://$USER_HOME$/Downloads/opencv/build/java/opencv-4120.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../opencv/build/java/opencv-4110.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../opencv/build/java/opencv-4110.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" name="lib" level="application" />
   </component>
 </module>
