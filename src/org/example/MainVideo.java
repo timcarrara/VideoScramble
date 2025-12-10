@@ -34,7 +34,7 @@ public class MainVideo extends Application {
     @Override
     public void start(Stage stage) {
 
-        String path = "src/videos/video2.mp4";
+        String path = "src/videos/video.mp4";
 
         // Ouvrir 3 captures pour les 3 affichages
         captureOriginal = new VideoCapture(path);
