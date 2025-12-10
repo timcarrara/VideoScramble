@@ -39,9 +39,9 @@ public class Main extends Application {
 
         // brute-force multithread (retourne la meilleure clé)
         long t0 = System.currentTimeMillis();
-        int[] found = FrameScrambler.bruteForce(scrambled);
+        int[] found = FrameScrambler.bruteForceTurbo(scrambled);
         long t1 = System.currentTimeMillis();
-        System.out.println("Brute-force terminé en " + (t1 - t0) + " ms. clé trouvée : r=" + found[0] + " s=" + found[1]);
+        System.out.println("Brute-force optimisé terminé en " + (t1 - t0) + " ms. clé trouvée : r=" + found[0] + " s=" + found[1]);
 
         // Déchiffrer avec la clé trouvée
         Mat brute = FrameScrambler.unscramble(scrambled, found[0], found[1]);
