@@ -22,7 +22,7 @@ import java.io.File;
 /**
  * VideoScramble - Application JavaFX pour chiffrement/déchiffrement vidéo
  *
- * @author Votre Nom
+ * @author BONNIN Simon, CARRARA Tim
  * @version 1.0
  */
 public class Main extends Application {
@@ -161,16 +161,6 @@ public class Main extends Application {
                     new FileChooser.ExtensionFilter("Vidéo AVI non compressée (recommandé)", "*.avi"),
                     new FileChooser.ExtensionFilter("Vidéo MP4 (ne fonctionne PAS avec clé embarquée)", "*.mp4")
             );
-            // Suggérer .avi par défaut
-            String suggestedName = "output.avi";
-            if (inputPath != null) {
-                File inputFile = new File(inputPath);
-                String baseName = inputFile.getName().replaceFirst("[.][^.]+$", "");
-                String modePrefix = modeCombo.getValue().startsWith("Chiffrement") ? "_encrypted" : "_decrypted";
-                suggestedName = baseName + modePrefix + ".avi";
-            }
-            fc.setInitialFileName(suggestedName);
-
             // Dossier par défaut
             File videosDir = new File("src/videos");
             if (videosDir.exists() && videosDir.isDirectory()) {
@@ -178,7 +168,7 @@ public class Main extends Application {
             }
 
             // Nom suggéré basé sur l'entrée
-            suggestedName = "output.mp4";
+            String suggestedName = "output.mp4";
             if (inputPath != null) {
                 File inputFile = new File(inputPath);
                 String baseName = inputFile.getName().replaceFirst("[.][^.]+$", "");
@@ -433,9 +423,7 @@ public class Main extends Application {
         System.out.println("Extract key : " + extractKey);
         System.out.println("==========================");
 
-        Platform.runLater(() -> {
-            fpsLabel.setText("FPS: " + String.format("%.1f", fps) + " | Frames: " + totalFrames);
-        });
+        Platform.runLater(() -> fpsLabel.setText("FPS: " + String.format("%.1f", fps) + " | Frames: " + totalFrames));
 
         // Création du VideoWriter
         VideoWriter writer = null;
@@ -519,14 +507,14 @@ public class Main extends Application {
 
                     // 2. Embarquer la clé APRÈS le chiffrement (dans TOUTES les frames si embedKey activé)
                     if (embedKey) {
-                        KeyEmbedder.embedKeyInPixel(processed, currentR, currentS);
+                        EmbarquementCle.cleDansPixel(processed, currentR, currentS);
                         if (frameCount == 1) {
                             System.out.println("Mode embarquement activé - Clé (r=" + currentR + ", s=" + currentS + ") embarquée dans toutes les frames");
                         }
 
                         // Test immédiat d'extraction sur la première frame
                         if (frameCount == 1) {
-                            int[] testExtract = KeyEmbedder.extractKeyFromPixel(processed);
+                            int[] testExtract = EmbarquementCle.extractionCleFromPixel(processed);
                             System.out.println("TEST embarquement frame 1 - Clé ré-extraite : r=" + testExtract[0] + ", s=" + testExtract[1]);
                             if (testExtract[0] != currentR || testExtract[1] != currentS) {
                                 System.err.println("ERREUR : La clé embarquée ne correspond pas !");
@@ -537,7 +525,7 @@ public class Main extends Application {
                     // === DÉCHIFFREMENT ===
                     // 1. Extraire la clé AVANT de déchiffrer (si mode avec clé embarquée)
                     if (extractKey) {
-                        int[] embeddedKey = KeyEmbedder.extractKeyFromPixel(frame);
+                        int[] embeddedKey = EmbarquementCle.extractionCleFromPixel(frame);
                         currentR = embeddedKey[0];
                         currentS = embeddedKey[1];
 
@@ -547,9 +535,7 @@ public class Main extends Application {
                             System.out.println("Clé extraite de la frame 1 : r=" + currentR + ", s=" + currentS);
                             int finalR = currentR;
                             int finalS = currentS;
-                            Platform.runLater(() -> {
-                                keyLabel.setText("Clé extraite (r, s): (" + finalR + ", " + finalS + ")");
-                            });
+                            Platform.runLater(() -> keyLabel.setText("Clé extraite (r, s): (" + finalR + ", " + finalS + ")"));
                         }
 
                         // Debug : vérifier la clé extraite régulièrement
@@ -558,7 +544,7 @@ public class Main extends Application {
                         }
 
                         // Vérifier si la clé est valide
-                        if (!KeyEmbedder.isValidKey(embeddedKey)) {
+                        if (!EmbarquementCle.estUneCleValide(embeddedKey)) {
                             System.err.println("ATTENTION Frame " + frameCount + " : Clé invalide ! r=" + currentR + ", s=" + currentS);
                         }
                     }
