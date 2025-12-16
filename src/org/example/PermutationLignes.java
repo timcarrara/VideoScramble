@@ -155,7 +155,7 @@ public class PermutationLignes {
         }
         for (int newIndex = 0; newIndex < p; newIndex++) {
             int oldIndex = inverse[newIndex];
-            lignesDecryptees[debut + oldIndex] = lignesDecryptees[debut + newIndex];
+            lignesDecryptees[debut + oldIndex] = lignesCryptees[debut + newIndex];
         }
         unscrambleBlockRowsFast(lignesDecryptees, lignesCryptees, debut + p, fin, r, s);
     }

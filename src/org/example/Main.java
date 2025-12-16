@@ -452,7 +452,6 @@ public class Main extends Application {
                 capture.release();
                 throw new RuntimeException("Impossible de créer la vidéo de sortie : " + outputPath);
             }
-            System.out.println("VideoWriter créé avec succès : " + outputPath);
         }
 
 
@@ -615,9 +614,7 @@ public class Main extends Application {
         capture.release();
 
         if (writer != null) {
-            System.out.println("Libération du VideoWriter...");
             writer.release();
-            System.out.println("VideoWriter libéré.");
         }
 
         int finalFrameCount = frameCount;

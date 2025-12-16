@@ -2,7 +2,7 @@
  * Recherche de clés par force brute
  * Auteurs : BONNIN Simon, CARRARA Tim
  * Groupe  : S5 - A2
- * Date    : Décembre 2024
+ * Date    : Décembre 2025
  * Description : Cette classe implémente une attaque par force brute pour trouver
  * les clés de déchiffrement d'une image cryptée.
  * L'algorithme teste toutes les combinaisons possibles de clés (r, s) en utilisant
